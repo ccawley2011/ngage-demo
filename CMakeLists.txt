@@ -10,7 +10,6 @@ endif()
 project(demo C CXX)
 
 include(SDL)
-include(dbgprint)
 
 # Use CMake or Visual Studio to enable these settings.
 option(INSTALL_EKA2L1 "Install app for EKA2L1" OFF)
@@ -27,7 +26,6 @@ set(demo_static_libs
     ${CMAKE_CURRENT_BINARY_DIR}/libSDL.a)
 
 set(demo_libs
-    ${CMAKE_CURRENT_BINARY_DIR}/libdbgprint.a
     ${EPOC_PLATFORM}/gcc/lib/gcc-lib/arm-epoc-pe/2.9-psion-98r2/libgcc.a
     ${EPOC_LIB}/egcc.lib
     ${EPOC_LIB}/euser.lib
@@ -63,7 +61,6 @@ target_compile_definitions(
     demo
     PUBLIC
     __EXE__
-    CAP_SPEED=0
     ${GCC_DEFS}
     UID1=${UID1}
     UID2=${UID2}
@@ -78,5 +75,4 @@ target_include_directories(
     demo
     PUBLIC
     ${SRC_DIR}
-    ${SDL_INC_DIR}
-    ${DBGPRINT_INC_DIR})
+    ${SDL_INC_DIR})
