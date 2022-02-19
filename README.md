@@ -1,6 +1,6 @@
 # demo
 
-A simple demo application to test and demonstrate [SDL
+A simple demo game to test and demonstrate [SDL
 2.0](https://github.com/ngagesdk/SDL).
 
 ## Licence and Credits
