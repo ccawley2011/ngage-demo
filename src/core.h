@@ -24,6 +24,6 @@ typedef enum status
 
 status_t init_core(const char* title, core_t** core);
 status_t update_core(core_t* core);
-void free_core(core_t *core);
+void     free_core(core_t *core);
 
 #endif /* CORE_H */
