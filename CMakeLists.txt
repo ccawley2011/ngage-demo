@@ -10,6 +10,8 @@ endif()
 project(demo C CXX)
 
 include(SDL)
+include(libtmx)
+include(dbgprint)
 
 # Use CMake or Visual Studio to enable these settings.
 option(INSTALL_EKA2L1 "Install app for EKA2L1" OFF)
@@ -26,6 +28,9 @@ set(demo_static_libs
     ${CMAKE_CURRENT_BINARY_DIR}/libSDL.a)
 
 set(demo_libs
+    ${CMAKE_CURRENT_BINARY_DIR}/libdbgprint.a
+    ${CMAKE_CURRENT_BINARY_DIR}/libtmx.a
+    ${CMAKE_CURRENT_BINARY_DIR}/libxml2.a
     ${EPOC_PLATFORM}/gcc/lib/gcc-lib/arm-epoc-pe/2.9-psion-98r2/libgcc.a
     ${EPOC_LIB}/egcc.lib
     ${EPOC_LIB}/euser.lib
@@ -39,11 +44,12 @@ set(demo_libs
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 set(demo_sources
-  "${SRC_DIR}/demo.c")
+  "${SRC_DIR}/main.c"
+  "${SRC_DIR}/core.c"
+  "${SRC_DIR}/tiled.c")
 
 add_library(demo STATIC ${demo_sources})
 build_exe_static(demo exe ${UID1} ${UID2} ${UID3} "${demo_static_libs}" "${demo_libs}")
-
 if(INSTALL_EKA2L1)
     copy_file(demo.exe ${CMAKE_CURRENT_BINARY_DIR}     ${EKA2L1_E_DRIVE} demo.exe)
     copy_file(demo.exe ${CMAKE_CURRENT_SOURCE_DIR}/res ${EKA2L1_E_DRIVE} splash.bmp)
@@ -55,7 +61,9 @@ add_dependencies(
 
 add_dependencies(
     demo
-    SDL)
+    SDL
+    tmx
+    xml2)
 
 target_compile_definitions(
     demo
@@ -75,4 +83,6 @@ target_include_directories(
     demo
     PUBLIC
     ${SRC_DIR}
-    ${SDL_INC_DIR})
+    ${SDL_INC_DIR}
+    ${LIBTMX_INC_DIR}
+    ${LIBXML2_INC_DIR})

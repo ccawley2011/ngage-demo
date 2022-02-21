@@ -7,7 +7,7 @@ status_t init_core(const char* title, core_t** core)
 {
     status_t status = CORE_OK;
 
-    *core = (core_t*)SDL_calloc(1, sizeof(struct core));
+    *core = (core_t*)calloc(1, sizeof(struct core));
     if (NULL == *core)
     {
         SDL_Log("%s: error allocating memory.", __FUNCTION__);
@@ -86,9 +86,72 @@ void free_core(core_t *core)
 
     if (core)
     {
-        SDL_free(core);
+        free(core);
         core = NULL;
     }
 
     SDL_Quit();
+}
+
+status_t load_map(const char* file_name, core_t* core)
+{
+    char* tileset_image_source = NULL;
+
+    if (is_map_loaded(core))
+    {
+        SDL_Log("A map has already been loaded: unload map first.");
+        return CORE_WARNING;
+    }
+
+    // Load map file and allocate required memory.
+
+    // [1] Map.
+    core->map = (map_t*)calloc(1, sizeof(struct map));
+    if (! core->map)
+    {
+        SDL_Log("%s: error allocating memory.", __FUNCTION__);
+        return CORE_WARNING;
+    }
+
+    // [2] Tiled map.
+    if (CORE_OK != load_tiled_map(file_name, core))
+    {
+        goto warning;
+    }
+    core->is_map_loaded = SDL_TRUE;
+
+    // [3] Paths.
+    if (CORE_OK != load_map_path(file_name, core))
+    {
+        goto warning;
+    }
+
+    core->map->height = (Sint32)((Sint32)core->map->handle->height * get_tile_height(core->map->handle));
+    core->map->width  = (Sint32)((Sint32)core->map->handle->width  * get_tile_width(core->map->handle));
+
+    return CORE_OK;
+warning:
+    unload_map(core);
+    return CORE_WARNING;
+}
+
+void unload_map(core_t* core)
+{
+    if (! is_map_loaded(core))
+    {
+        SDL_Log("No map has been loaded.");
+        return;
+    }
+    core->is_map_loaded = SDL_FALSE;
+
+    // Free up allocated memory in reverse order.
+
+    // [3] Paths and file locations.
+    free(core->map->path);
+
+    // [2] Tiled map.
+    unload_tiled_map(core);
+
+    // [1] Map.
+    free(core->map);
 }
