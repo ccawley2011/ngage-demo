@@ -10,7 +10,7 @@ status_t init_core(const char* title, core_t** core)
     *core = (core_t*)calloc(1, sizeof(struct core));
     if (NULL == *core)
     {
-        SDL_Log("%s: error allocating memory.", __FUNCTION__);
+        dbgprint("%s: error allocating memory.", __FUNCTION__);
         return CORE_ERROR;
     }
 
@@ -18,7 +18,7 @@ status_t init_core(const char* title, core_t** core)
 
     if (0 != SDL_Init(SDL_INIT_VIDEO))
     {
-        SDL_Log("Unable to initialise SDL: %s", SDL_GetError());
+        dbgprint("Unable to initialise SDL: %s", SDL_GetError());
         return CORE_ERROR;
     }
 
@@ -30,20 +30,20 @@ status_t init_core(const char* title, core_t** core)
         SDL_WINDOW_FULLSCREEN);
     if (NULL == (*core)->window)
     {
-        SDL_Log("Could not create window: %s", SDL_GetError());
+        dbgprint("Could not create window: %s", SDL_GetError());
         return CORE_ERROR;
     }
 
     (*core)->renderer = SDL_CreateRenderer((*core)->window, 0, SDL_RENDERER_SOFTWARE);
     if (NULL == (*core)->renderer)
     {
-        SDL_Log("Could not create renderer: %s", SDL_GetError());
+        dbgprint("Could not create renderer: %s", SDL_GetError());
         SDL_DestroyWindow((*core)->window);
         return CORE_ERROR;
     }
     if (0 != SDL_RenderSetIntegerScale((*core)->renderer, SDL_TRUE))
     {
-        SDL_Log("Could not enable integer scale: %s", SDL_GetError());
+        dbgprint("Could not enable integer scale: %s", SDL_GetError());
         status = CORE_WARNING;
     }
 
@@ -54,7 +54,9 @@ status_t init_core(const char* title, core_t** core)
 
 status_t update_core(core_t* core)
 {
+    status_t  status     = CORE_OK;
     SDL_Event event;
+    Uint32    delta_time = 0;
 
     (void)core;
 
@@ -63,14 +65,40 @@ status_t update_core(core_t* core)
         switch (event.key.keysym.sym)
         {
             case SDLK_BACKSPACE:
-                return CORE_EXIT;
+                status = CORE_EXIT;
+                goto exit;
             default:
                 break;
         }
     }
 
-    SDL_RenderPresent(core->renderer);
-    return CORE_OK;
+    core->time_b = core->time_a;
+    core->time_a = SDL_GetTicks();
+
+    if (core->time_a > core->time_b)
+    {
+        core->time_a = core->time_b;
+    }
+
+    delta_time                   = (Uint32)(core->time_b - core->time_a) / 1000;
+    core->time_since_last_frame  = 17 - delta_time;
+
+    // Delay? Probably not.
+
+    if (! is_map_loaded(core))
+    {
+        return;
+    }
+
+    status = render_scene(core);
+    if (CORE_OK != status)
+    {
+        goto exit;
+    }
+    status = draw_scene(core);
+
+exit:
+    return status;
 }
 
 void free_core(core_t *core)
@@ -100,7 +128,7 @@ status_t load_map(const char* file_name, core_t* core)
 
     if (is_map_loaded(core))
     {
-        SDL_Log("A map has already been loaded: unload map first.");
+        dbgprint("A map has already been loaded: unload map first.");
         return CORE_WARNING;
     }
 
@@ -110,7 +138,7 @@ status_t load_map(const char* file_name, core_t* core)
     core->map = (map_t*)calloc(1, sizeof(struct map));
     if (! core->map)
     {
-        SDL_Log("%s: error allocating memory.", __FUNCTION__);
+        dbgprint("%s: error allocating memory.", __FUNCTION__);
         return CORE_WARNING;
     }
 
@@ -123,6 +151,18 @@ status_t load_map(const char* file_name, core_t* core)
 
     // [3] Paths.
     if (CORE_OK != load_map_path(file_name, core))
+    {
+        goto warning;
+    }
+
+    // [4] Tileset.
+    if (CORE_OK != load_tileset(core))
+    {
+        goto warning;
+    }
+
+    // [5] Animated tiles.
+    if (CORE_OK != load_animated_tiles(core))
     {
         goto warning;
     }
@@ -140,12 +180,22 @@ void unload_map(core_t* core)
 {
     if (! is_map_loaded(core))
     {
-        SDL_Log("No map has been loaded.");
+        dbgprint("No map has been loaded.");
         return;
     }
     core->is_map_loaded = SDL_FALSE;
 
     // Free up allocated memory in reverse order.
+
+    // [5] Animated tiles.
+    free(core->map->animated_tile);
+
+    // [4] Tileset.
+    if (core->map->tileset_texture)
+    {
+        SDL_DestroyTexture(core->map->tileset_texture);
+        core->map->tileset_texture = NULL;
+    }
 
     // [3] Paths and file locations.
     free(core->map->path);
