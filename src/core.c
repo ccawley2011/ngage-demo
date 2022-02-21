@@ -69,6 +69,7 @@ status_t update_core(core_t* core)
         }
     }
 
+    SDL_RenderPresent(core->renderer);
     return CORE_OK;
 }
 
