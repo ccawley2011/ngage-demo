@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
         goto quit;
     }
 
-    load_map("E:\\city.tmx", core);
+    load_map("E:\\demo.tmx", core);
 
     while(CORE_OK == update_core(core));
 

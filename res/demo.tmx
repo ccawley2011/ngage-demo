@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="21" height="42" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="1">
+ <tileset firstgid="1" source="grass_biome.tsx"/>
+ <layer id="1" name="Kachelebene 1" width="21" height="42">
+  <data encoding="base64" compression="zlib">
+   eJztlbtOQkEQhg8KMdEojUajsaCBxMIoFt4QCiOCFCqCjcZbqa09D2CivoCX1kvrJT6d/8TZOE7m7DlgownFlz0snG9ndmaXYhAExS5d/hFNsBHCboeuGugBCZDkkciClTadJdArHAl25/iZxmob8TY5vhZYMFgU66VjuinGJbDMFMC88K2J2GUuVY+XnGWwzlTAKjhnn3OOC99QhJecdbDDNMAm2ALb7LwBt+AO3Kt9t2pX4u8uwD4/77HTeR/AI3gCzxxnNsTp6uPWvARX4FrF8gJewRt4D372hnaW1LsOWTNXN5qfAn1gWNQrrlPWjDgVXmIy+O4t7TwGczGcljcdo0Z0Vj74WfbBoeEdEW6rn1ysOc6JxiMwy/M6ZurfjMorLFbtpPVrHqerYyEif1lXF0Nd5e+cZfHZclL+eVEvcveDseCrB/U5y4i5RogzrA+mwYDBTIz9tPaBejopRulIdeiU548co2ACDKr6+Jzy/0OfzwLvYZLnz0R9wpz6LpHv6f7R81FnyfJZ/UMccM3pbJx4YrR87l3pdHNR96flk/npnkyExChztu4i6dT9FGcfZV7WXaR9VozaKfNyz85dEb9LeXy+O1nHXgmic/bdHxJdE1/OPnfes0Y7vjhr5H/p+0t8As4Wv6o=
+  </data>
+ </layer>
+ <layer id="2" name="Tile Layer 2" width="21" height="42">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjAL6gIlAPAmIJwPxlAF2y1ABU4F4GhBPxyFfQoaZC4F4ERAvxqMmgUQz1wLxOiBeT4RaWSLN3Amld5PoFkJAkAS15ITvUAZLgHgpFc0TB+INQLyRimYqAvEeIN5LBbMSkMwcBdQDulQ2L4eB+HJjIM0EAU0amDkKRgEuAAC4ABEr
+  </data>
+ </layer>
+</map>

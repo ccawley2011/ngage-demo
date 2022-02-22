@@ -10,6 +10,7 @@ endif()
 project(demo C CXX)
 
 include(SDL)
+include(cwalk)
 include(libtmx)
 include(dbgprint)
 
@@ -24,13 +25,13 @@ set(GCC_COMN_DEFS -D__SYMBIAN32__ -D__GCC32__ -D__EPOC32__ -D__MARM__ -D__MARM_A
 set(GCC_MODE_DEFS -DNDEBUG -D_UNICODE)
 set(GCC_DEFS      ${GCC_COMN_DEFS} ${GCC_MODE_DEFS})
 
-set(demo_static_libs
-    ${CMAKE_CURRENT_BINARY_DIR}/libSDL.a)
-
 set(demo_libs
+    ${CMAKE_CURRENT_BINARY_DIR}/libSDL.a
     ${CMAKE_CURRENT_BINARY_DIR}/libdbgprint.a
     ${CMAKE_CURRENT_BINARY_DIR}/libtmx.a
     ${CMAKE_CURRENT_BINARY_DIR}/libxml2.a
+    ${CMAKE_CURRENT_BINARY_DIR}/libzlib.a
+    ${CMAKE_CURRENT_BINARY_DIR}/libcwalk.a
     ${EPOC_PLATFORM}/gcc/lib/gcc-lib/arm-epoc-pe/2.9-psion-98r2/libgcc.a
     ${EPOC_LIB}/egcc.lib
     ${EPOC_LIB}/euser.lib
@@ -49,10 +50,13 @@ set(demo_sources
   "${SRC_DIR}/tiled.c")
 
 add_library(demo STATIC ${demo_sources})
-build_exe_static(demo exe ${UID1} ${UID2} ${UID3} "${demo_static_libs}" "${demo_libs}")
+build_exe(demo exe ${UID1} ${UID2} ${UID3} "${demo_libs}")
 if(INSTALL_EKA2L1)
     copy_file(demo.exe ${CMAKE_CURRENT_BINARY_DIR}     ${EKA2L1_E_DRIVE} demo.exe)
     copy_file(demo.exe ${CMAKE_CURRENT_SOURCE_DIR}/res ${EKA2L1_E_DRIVE} splash.bmp)
+    copy_file(demo.exe ${CMAKE_CURRENT_SOURCE_DIR}/res ${EKA2L1_E_DRIVE} demo.tmx)
+    copy_file(demo.exe ${CMAKE_CURRENT_SOURCE_DIR}/res ${EKA2L1_E_DRIVE} grass_biome.tsx)
+    copy_file(demo.exe ${CMAKE_CURRENT_SOURCE_DIR}/res ${EKA2L1_E_DRIVE} overworld_tileset_grass.bmp)
 endif()
 
 add_dependencies(

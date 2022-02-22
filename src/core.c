@@ -67,9 +67,38 @@ status_t update_core(core_t* core)
             case SDLK_BACKSPACE:
                 status = CORE_EXIT;
                 goto exit;
+            case SDLK_UP:
+                core->camera.pos_y -= 10;
+                break;
+            case SDLK_DOWN:
+                core->camera.pos_y += 10;
+                break;
+            case SDLK_LEFT:
+                core->camera.pos_x -= 10;
+                break;
+            case SDLK_RIGHT:
+                core->camera.pos_x += 10;
+                break;
             default:
                 break;
         }
+    }
+
+    if (core->camera.pos_x <= 0)
+    {
+        core->camera.pos_x = 0;
+    }
+    if (core->camera.pos_x >= core->map->width - 176)
+    {
+        core->camera.pos_x = core->map->width - 176;
+    }
+    if (core->camera.pos_y <= 0)
+    {
+        core->camera.pos_y = 0;
+    }
+    if (core->camera.pos_y >= core->map->height - 208)
+    {
+        core->camera.pos_y = core->map->height - 208;
     }
 
     core->time_b = core->time_a;
@@ -161,12 +190,6 @@ status_t load_map(const char* file_name, core_t* core)
         goto warning;
     }
 
-    // [5] Animated tiles.
-    if (CORE_OK != load_animated_tiles(core))
-    {
-        goto warning;
-    }
-
     core->map->height = (Sint32)((Sint32)core->map->handle->height * get_tile_height(core->map->handle));
     core->map->width  = (Sint32)((Sint32)core->map->handle->width  * get_tile_width(core->map->handle));
 
@@ -186,9 +209,6 @@ void unload_map(core_t* core)
     core->is_map_loaded = SDL_FALSE;
 
     // Free up allocated memory in reverse order.
-
-    // [5] Animated tiles.
-    free(core->map->animated_tile);
 
     // [4] Tileset.
     if (core->map->tileset_texture)

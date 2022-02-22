@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-#include <stb_sprintf.h> // libxml2
+#include "stb_sprintf.h" /* libxml2 */
 
 #include <SDL.h>
 #include <tmx.h>
 #include "core.h"
-
-#define H_is_in_foreground 0xdba8c1d8d43eb8f1
 
 static void tmxlib_store_property(tmx_property* property, void* core);
 
@@ -124,8 +122,15 @@ Sint32 get_tile_width(tmx_map* tiled_map)
 void set_tileset_path(char* path_name, Sint32 path_length, core_t* core)
 {
     Sint32 first_gid      = get_first_gid(core->map->handle);
-    char*  ts_path        = core->map->handle->ts_head->source;
-    size_t ts_path_length = strlen(ts_path);
+    char   ts_path[64]    = { 0 };
+    size_t ts_path_length = 0;
+
+    cwk_path_get_dirname(core->map->handle->ts_head->source, &ts_path_length);
+
+    if (63 <= ts_path_length)
+    {
+        ts_path_length = 63;
+    }
 
     /* The tileset image source is stored relatively to the tileset
      * file but because we only know the location of the tileset
@@ -134,10 +139,10 @@ void set_tileset_path(char* path_name, Sint32 path_length, core_t* core)
      */
 
     SDL_strlcpy(ts_path, core->map->handle->ts_head->source, ts_path_length + 1);
-    stbsp_snprintf(path_name, (Sint32)path_length, "%s%s%s",
-                   core->map->path,
-                   ts_path,
-                   core->map->handle->tiles[first_gid]->tileset->image->source);
+    stbsp_snprintf(path_name, (Sint32)path_length, "E:\\%s%s%s",
+        core->map->path,
+        ts_path,
+        core->map->handle->tiles[first_gid]->tileset->image->source);
 }
 
 Sint32 get_tileset_path_length(core_t* core)
@@ -322,17 +327,17 @@ const char* get_string_map_property(const Uint64 name_hash, core_t* core)
     return core->map->string_property;
 }
 
-status_t load_map_path(const char* file_name, core_t* core)
+status_t load_map_path(const char* map_file_name, core_t* core)
 {
-    core->map->path = (char*)calloc(1, (size_t)(strlen(file_name) + 1));
+    core->map->path = (char*)calloc(1, (size_t)(strlen(map_file_name) + 1));
     if (! core->map->path)
     {
         dbgprint("%s: error allocating memory.", FUNCTION_NAME);
         return CORE_ERROR;
     }
 
-    core->map->path_length = strlen(file_name);
-    SDL_strlcpy(core->map->path, file_name, core->map->path_length + 1);
+    cwk_path_get_dirname(map_file_name, (size_t*)&(core->map->path_length));
+    SDL_strlcpy(core->map->path, map_file_name, core->map->path_length + 1);
 
     return CORE_OK;
 }
@@ -351,6 +356,10 @@ status_t load_texture_from_file(const char* file_name, SDL_Texture** texture, co
     {
         dbgprint("Failed to load image: %s", SDL_GetError());
         return CORE_ERROR;
+    }
+    if (0 != SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0xff, 0x00, 0xff)))
+    {
+        dbgprint("Failed to set color key for %s: %s", file_name, SDL_GetError());
     }
 
     *texture = SDL_CreateTextureFromSurface(core->renderer, surface);
@@ -643,6 +652,7 @@ status_t render_map(Sint32 level, core_t* core)
             return CORE_ERROR;
         }
 
+        /*
         if (render_animated_tiles)
         {
             if (core->map->animated_tile_texture)
@@ -654,6 +664,7 @@ status_t render_map(Sint32 level, core_t* core)
                 }
             }
         }
+        */
 
         return CORE_OK;
     }
@@ -686,22 +697,9 @@ status_t render_map(Sint32 level, core_t* core)
 
         if (is_tiled_layer_of_type(L_LAYER, layer))
         {
-            SDL_bool is_in_foreground  = SDL_FALSE;
-            SDL_bool is_layer_rendered = SDL_FALSE;
             Sint32   prop_cnt = get_layer_property_count(layer);
 
-            is_in_foreground = get_boolean_property(H_is_in_foreground, layer->properties, prop_cnt, core);
-
-            if (MAP_LAYER_BG == level && SDL_FALSE == is_in_foreground)
-            {
-                is_layer_rendered = SDL_TRUE;
-            }
-            else if (MAP_LAYER_FG == level && is_in_foreground)
-            {
-                is_layer_rendered = SDL_TRUE;
-            }
-
-            if (layer->visible && is_layer_rendered)
+            if (layer->visible)
             {
                 Sint32 index_height;
                 Sint32 index_width;
