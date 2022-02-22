@@ -62,26 +62,55 @@ status_t update_core(core_t* core)
 
     if (SDL_PollEvent(&event))
     {
-        switch (event.key.keysym.sym)
+        switch (event.type)
         {
-            case SDLK_BACKSPACE:
+            case SDL_QUIT:
                 status = CORE_EXIT;
                 goto exit;
-            case SDLK_UP:
-                core->camera.pos_y -= 10;
-                break;
-            case SDLK_DOWN:
-                core->camera.pos_y += 10;
-                break;
-            case SDLK_LEFT:
-                core->camera.pos_x -= 10;
-                break;
-            case SDLK_RIGHT:
-                core->camera.pos_x += 10;
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_ESCAPE:
+                    case SDLK_BACKSPACE:
+                        status = CORE_EXIT;
+                        goto exit;
+                    case SDLK_UP:
+                        core->up = (event.key.state == SDL_PRESSED);
+                        break;
+                    case SDLK_DOWN:
+                        core->down = (event.key.state == SDL_PRESSED);
+                        break;
+                    case SDLK_LEFT:
+                        core->left = (event.key.state == SDL_PRESSED);
+                        break;
+                    case SDLK_RIGHT:
+                        core->right = (event.key.state == SDL_PRESSED);
+                        break;
+                    default:
+                        break;
+                }
                 break;
             default:
                 break;
         }
+    }
+
+    if (core->up)
+    {
+        core->camera.pos_y -= 10;
+    }
+    if (core->down)
+    {
+        core->camera.pos_y += 10;
+    }
+    if (core->left)
+    {
+        core->camera.pos_x -= 10;
+    }
+    if (core->right)
+    {
+        core->camera.pos_x += 10;
     }
 
     if (core->camera.pos_x <= 0)

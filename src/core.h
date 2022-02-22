@@ -91,7 +91,10 @@ typedef struct core
     Uint32        time_since_last_frame;
     Uint32        time_a;
     Uint32        time_b;
-
+    SDL_bool      up;
+    SDL_bool      down;
+    SDL_bool      left;
+    SDL_bool      right;
 } core_t;
 
 typedef enum status
